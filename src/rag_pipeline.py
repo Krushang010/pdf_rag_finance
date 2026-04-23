@@ -1,3 +1,4 @@
+# ------------------ RAG PIPELINE FUNCTION ------------------ #
 def run_rag_pipeline(pdf_path):
     from langchain_community.document_loaders import PyPDFLoader
     from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -28,24 +29,24 @@ def run_rag_pipeline(pdf_path):
         model_name="all-MiniLM-L6-v2"
     )
 
-    # 4. Vector DB (Chroma)
+    # 4. Vector DB
     vector_store = Chroma.from_documents(
         documents=chunks,
         embedding=embedding_model
     )
 
-    # 5. Retrieval query (analysis-focused)
+    # 5. Query
     query = "Revenue, Profit Before Tax, Profit After Tax comparison latest quarter vs previous year financial results"
 
     results = vector_store.similarity_search(query, k=5)
 
-    # 6. Build structured context
+    # 6. Context
     context = "\n\n".join([
         f"[Chunk {i+1}]\n{doc.page_content}"
         for i, doc in enumerate(results)
     ])
 
-    # 7. LLM call (analysis prompt)
+    # 7. LLM call
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[
@@ -96,10 +97,7 @@ High / Medium / Low
 """
             }
         ],
-        temperature=0.2
+        temperature=0.3
     )
 
-    # 8. Return final result
-    final_answer = response.choices[0].message.content
-
-    return final_answer
+    return response.choices[0].message.content
