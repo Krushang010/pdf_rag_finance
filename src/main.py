@@ -1,23 +1,15 @@
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
-# Put your PDF file in project root
+# Load PDF
 pdf_path = "TDPOWERSYS_29012026162954_Outcome_of_Board_Meeting_Financial_Results.pdf"
-
 loader = PyPDFLoader(pdf_path)
-
 documents = loader.load()
 
-# Print number of pages
 print(f"Total pages: {len(documents)}\n")
 
-# Print first page
-print("First page content:\n")
-print(documents[0].page_content)
-
-# 🔹 Step 2: Chunking
-
+# Chunking
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=800,
     chunk_overlap=150
@@ -27,22 +19,14 @@ chunks = splitter.split_documents(documents)
 
 print(f"Total chunks created: {len(chunks)}\n")
 
-# Print first chunk
-print("First chunk:\n")
-print(chunks[0].page_content)
-
-
-
-
-# Step 3: Embedding model
+# Embeddings
 embedding_model = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-base-en-v1.5"
+    model_name="all-MiniLM-L6-v2"
 )
 
-# Convert chunks into embeddings
 embeddings = embedding_model.embed_documents(
     [chunk.page_content for chunk in chunks]
 )
 
-print(f"\nTotal embeddings created: {len(embeddings)}")
-print(f"Embedding dimension: {len(embeddings[0])}")
+print(f"Total embeddings: {len(embeddings)}")
+print(f"Embedding size: {len(embeddings[0])}")
